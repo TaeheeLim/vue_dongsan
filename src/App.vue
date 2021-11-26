@@ -1,33 +1,45 @@
 <template>
-
   <div class="menu">
     <a v-for="(a,i) in 메뉴들" :key="i">{{ a }}</a>
   </div>
 
-  <div class="black-bg" v-if="모달창열렸니 == true">
-    <div class="white-bg">
-      <h4>상세페이지</h4>
-      <p>상세페이지 내용</p>
-      <button @click="모달창열렸니 = false">닫기</button>
-    </div>
-  </div>
 
-  <div v-for="a in 원룸들" :key="a">
-    <img :src="a.image" class="room-img">
-    <h4>{{ a.title }}</h4>
-    <p>{{ a.price }}원</p>
-  </div>
+  <Discount v-if="showDiscount == true" />
+
+  <button @click="priceSort">가격순정렬</button>
+  <button @click="priceBackSort">가격역순정렬</button>
+  <button @click="titleSort">제목 순 정렬</button>
+  <button @click="sortBack">되돌리기</button>
+  
+  <transition name="fade">
+    <Modal @closeModal="모달창열렸니 = false"
+    :원룸들="원룸들" :누른거="누른거" :모달창열렸니="모달창열렸니" />
+  </transition>
+
+  <Card @openModal="모달창열렸니 = true; 누른거 = $event" :원룸="원룸들[i]" v-for="(a,i) in 원룸들" :key="a"/>
+  
+  <!-- <Card :원룸="원룸들[1]" />
+  <Card :원룸="원룸들[2]" />
+  <Card :원룸="원룸들[3]" />
+  <Card :원룸="원룸들[4]" />
+  <Card :원룸="원룸들[5]" /> -->
+
 </template>
 
 <script>
 import data from './assets/oneroom.js';
-
-
+import Discount from './Discount.vue';
+import Modal from './Modal.vue';
+import Card from './Card.vue';
 
 export default {
   name: 'App',
   data(){
     return {
+      showDiscount : true,
+      원룸들오리지널 : [...data],
+      오브젝트 : { name : 'kim', age : 20},
+      누른거 : 0,
       원룸들 : data,
       모달창열렸니 : false,
       신고수 : [0,0,0],
@@ -44,10 +56,36 @@ export default {
     },
     increase3(){
       this.신고수[2] += 1;
+    },
+    priceSort(){
+      this.원룸들.sort(function(a,b){
+        return a.price - b.price
+      })
+    },
+
+    priceBackSort(){
+      this.원룸들.sort(function(a,b){
+        return b.price - a.price
+      })
+    },
+    titleSort(){
+      this.원룸들.sort(function(a, b){
+        return a.title.localeCompare(b.title);
+      })
+    },
+    sortBack(){
+      this.원룸들 = [...this.원룸들오리지널];
     }
   },
-  components: {
 
+  mounted(){
+    
+  },
+
+  components: {
+    Discount : Discount,
+    Modal : Modal,
+    Card : Card,
   }
 }
 </script>
@@ -60,7 +98,7 @@ div {
   box-sizing: border-box;
 }
 .black-bg {
-  width: 100%; height: 100%;
+  width: 60%; height: 60%;
   background: rgba(0, 0, 0, 5);
   position: fixed; padding: 20px;
 }
@@ -87,7 +125,44 @@ div {
   padding: 10px;
 }
 .room-img {
-  width: 100%;
+  width: 50%;
   margin-top: 40px;
 }
+.discount {
+  background: #eee;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+}
+.start {
+  opacity: 0;
+  transition: all 1s;
+}
+.end {
+  opacity: 1;
+}
+.fade-leave-to {
+  opacity: 0;
+}
+.fade-enter-from {
+  transform: translateY(-1000px);
+  opacity: 0;
+}
+.fade-enter-active {
+  transition: all 1s;
+}
+.fade-enter-to {
+  transform: translateY(0px);
+  opacity: 1;
+}
+.fade-leave-from {
+  opacity: 1;
+}
+.fade-leave-active {
+  transition: all 1s;
+}
+.fade-leave-to {
+  opacity: 0;
+}
+
 </style>
